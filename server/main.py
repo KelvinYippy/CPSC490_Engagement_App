@@ -24,7 +24,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 class VideoClassifier(nn.Module):
     def __init__(self, num_classes, dropout_prob=0.5):
         super(VideoClassifier, self).__init__()
@@ -52,7 +51,7 @@ class VideoClassifier(nn.Module):
 # Load the PyTorch model
 # Replace 'YourModel' and 'model.pth' with your model class and file
 model = VideoClassifier(2)
-model.load_state_dict(torch.load('/Users/kelvinyip7/Desktop/Code/EngagementApp/server/model_0024_weights.pt')['state_dict'])
+model.load_state_dict(torch.load('./model_0024_weights.pt')['state_dict'])
 model.eval()
 
 def get_frame_rate(path: str):
@@ -91,9 +90,6 @@ def extract_frames(path: str) -> torch.Tensor:
     cap.release()
     destroyAllWindows()
     return torch.cat(frame_lst, dim=0)
-
-video_path = Path("video.mp4")
-CHUNK_SIZE = 1024*1024
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
