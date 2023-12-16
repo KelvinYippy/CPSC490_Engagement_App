@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Body
+from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from tempfile import NamedTemporaryFile
@@ -6,7 +6,6 @@ import torch
 import torch.nn as nn
 from os import remove
 from cv2 import VideoCapture, CAP_PROP_FPS, destroyAllWindows, resize
-from pathlib import Path
 
 app = FastAPI()
 
@@ -80,7 +79,7 @@ def extract_frames(path: str) -> torch.Tensor:
         ret, frame = cap.read()
         if ret == False:
             break
-        if i % 4 == 0 and i != 0:
+        if i % (frame_rate // 4) == 0:
             frame = resize(frame, (160, 90))
             frame = torch.from_numpy(frame).to(torch.uint8)
             frame = frame.permute(2, 0, 1)
