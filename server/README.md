@@ -60,3 +60,41 @@ To run the API, run the following command. The web-client ONLY WORKS if BOTH THE
 ```bash
 uvicorn main:app --reload
 ```
+
+## Step Four [Updating the Model]
+
+```python
+class VideoClassifier(nn.Module):
+    def __init__(self, num_classes, dropout_prob=0.5):
+        super(VideoClassifier, self).__init__()
+        self.conv1 = nn.Conv2d(15, 32, kernel_size=(3, 3), padding=(1, 1))
+        self.batch_norm_1 = nn.BatchNorm2d(32)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=(3, 3), padding=(1, 1))
+        self.batch_norm_2 = nn.BatchNorm2d(64)
+        self.conv3 = nn.Conv2d(64, 64, kernel_size=(3, 3), padding=(1, 1))
+        self.batch_norm_3 = nn.BatchNorm2d(64)
+        self.pool = nn.MaxPool2d(kernel_size=(2, 2))
+        self.fc1 = nn.Linear(64 * (160 // 8) * (90 // 8), 256)
+        self.dropout1 = nn.Dropout(dropout_prob)
+        self.fc2 = nn.Linear(256, num_classes)
+
+    def forward(self, x):
+        x = self.pool(nn.functional.relu(self.batch_norm_1(self.conv1(x))))
+        x = self.pool(nn.functional.relu(self.batch_norm_2(self.conv2(x))))
+        x = self.pool(nn.functional.relu(self.batch_norm_3(self.conv3(x))))
+        x = x.reshape(-1, 64 * (160 // 8) * (90 // 8))  # Adjust input size
+        x = nn.functional.relu(self.fc1(x))
+        x = self.dropout1(x)
+        x = self.fc2(x)
+        return x
+```
+
+```python
+# Load the PyTorch model
+# Replace 'YourModel' and 'model.pth' with your model class and file
+model = VideoClassifier(2)
+model.load_state_dict(torch.load('./model_0024_weights.pt')['state_dict'])
+model.eval()
+```
+
+The first code block loads the class architecture that the class uses, while the second code block loads weights. If you ever want to change the architecture / weights, here are the places to do so.
